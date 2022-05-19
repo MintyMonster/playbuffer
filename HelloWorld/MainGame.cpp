@@ -64,7 +64,7 @@ GameState gamestate;
 void SpawnAsteroid(int spawnX, int spawnY, int velocityX, int velocityY) {
 	Vector2D spawnPos = { spawnX, spawnY }; // Create spawn position
 
-	int id = CreateGameObject(TYPE_ASTEROID, spawnPos, 10, "asteroid1"); // Create the game object
+	int id = CreateGameObject(TYPE_ASTEROID, spawnPos, 15, "asteroid1"); // Create the game object
 	GetGameObject(id).velocity = { velocityX, velocityY }; // Give the game object it's direction
 }
 
@@ -260,6 +260,7 @@ void SpawnAsteroids() { // Randomly spawn asteroids around the screen
 
 void UpdateAsteroids() { // Upddate currently created asteroids
 	std::vector<int> asteroids = CollectGameObjectIDsByType(TYPE_ASTEROID); // Get all asteroids
+	std::vector<int> smallAsteroids = CollectGameObjectIDsByType(TYPE_SMALL_ASTEROID); // Get small asteroids
 
 	for (int id_asteroid : asteroids) { // Loop through asteroidsd
 		GameObject& obj_asteroid = GetGameObject(id_asteroid); // Instantiate a game object variable for the asteroid
@@ -270,7 +271,30 @@ void UpdateAsteroids() { // Upddate currently created asteroids
 		if (!IsVisible(obj_asteroid)) // If you can't see the asteroid, kill it
 			DestroyGameObject(id_asteroid);
 	}
-}
+
+	for (int id_small_asteroid : smallAsteroids) {
+		int amount = RandomRollRange(2, 5);
+		int particleAmount = RandomRollRange(2, 7);
+		bool hasCollided = false;
+
+		for (int asteroid : asteroids) {
+			GameObject& obj_asteroid = GetGameObject(asteroid);
+			GameObject& obj_small = GetGameObject(id_small_asteroid);
+				if (IsColliding(obj_asteroid, obj_small)) {
+					SpawnMiniAsteroid(obj_asteroid.pos, amount);
+					SpawnParticles(obj_asteroid.pos, particleAmount);
+					obj_asteroid.type = TYPE_DESTROYED;
+					obj_small.type = TYPE_DESTROYED;
+				}
+
+				if ((!IsVisible(obj_asteroid)) && hasCollided)
+					DestroyGameObject(asteroid);	
+
+				if (!IsVisible(obj_small) && hasCollided)
+					DestroyGameObject(id_small_asteroid);	
+			}
+		}
+	}
 
 void UpdateParticles() { // Update currently created particles
 	std::vector<int> particles = CollectGameObjectIDsByType(TYPE_PARTICLE); // Get all particles
@@ -395,7 +419,7 @@ bool MainGameUpdate( float elapsedTime )
 		else {
 			if (!gameOver) { // If the game's not over
 				++asteroidCurrent; // The asteroid ticker
-				PLAYER = CreateGameObject(TYPE_PLAYER, { 225, 150 }, 10, "playerChar"); // Create the player character
+				PLAYER = CreateGameObject(TYPE_PLAYER, { 225, 150 }, 15, "playerChar"); // Create the player character
 				DrawBackground(0); // Draw the game background
 				HandlePlayerControls(); // Handle all player controls
 				SpawnAsteroids(); // Spawn random asteroids
