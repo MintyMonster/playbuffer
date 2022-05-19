@@ -19,9 +19,10 @@ int SPACESHIP;
 int angle = 1; // 1 = up, 2 = down, 3 = left, 4 = right;
 
 // Player shooting timer
-//float startTime = 0;
-//float currentTime = 0;
-//float delay = 0.05f;
+//float shootStart = 0;
+//float shootCurrent = 0;
+//float shootDelay = 0.2f;
+//bool canShoot = true;
 
 // Asteroid spawn timer
 float asteroidStart = 0;
@@ -161,7 +162,6 @@ void HandlePlayerControls() { // Handle all player controls
 		int id = CreateGameObject(TYPE_BULLET, firePos, 2, "bullet"); // Create the bullet game object
 		GameObject& bul = GetGameObject(id); // instantiate a game object variable
 		PointGameObject(bul, 3, mousePos.x, mousePos.y); // Point the bullet in the direction of the mouse's current coordinates
-		
 	}
 	
 	UpdateGameObject(obj_player); // Update the player game object
@@ -352,6 +352,14 @@ void ResetGame() {
 	}
 }
 
+//void CanShoot() {
+//	if (shootCurrent - shootStart > shootDelay) {
+//		shootStart = shootCurrent;
+//		shootCurrent = 0;
+//		canShoot = true;
+//	}
+//}
+
 // "Expression must have a class" -> Error
 //void DrawScore(int score) {
 //	char* char_new = new char[gamestate.score.length()];
@@ -375,6 +383,7 @@ void MainGameEntry( PLAY_IGNORE_COMMAND_LINE ) // Similar to Unity's "onAwake()"
 bool MainGameUpdate( float elapsedTime )
 {
 	++splashCurrent; // Splash screen ticker
+	//++shootCurrent;
 
 	if (splashCurrent > splashDelay) { // Check if X seconds has passed
 		if (!playPressed) { // Check if "Play" has been pressed
@@ -386,7 +395,7 @@ bool MainGameUpdate( float elapsedTime )
 		else {
 			if (!gameOver) { // If the game's not over
 				++asteroidCurrent; // The asteroid ticker
-				PLAYER = CreateGameObject(TYPE_PLAYER, { 225, 150 }, 15, "playerChar"); // Create the player character
+				PLAYER = CreateGameObject(TYPE_PLAYER, { 225, 150 }, 10, "playerChar"); // Create the player character
 				DrawBackground(0); // Draw the game background
 				HandlePlayerControls(); // Handle all player controls
 				SpawnAsteroids(); // Spawn random asteroids
@@ -396,6 +405,7 @@ bool MainGameUpdate( float elapsedTime )
 				UpdateParticles(); // Update particle effects
 				UpdateMiniAsteroids(); // Update mini asteroids
 				UpdatePlayer(); // Update the player
+				//CanShoot(); // Shooting timer check
 			}
 			else {
 				DrawBackground(2); // Show the "Game over" screen
